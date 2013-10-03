@@ -1,6 +1,8 @@
 
 type inttree = Empty | Node of int * inttree * inttree
 
+let divAv (num, tot) = ( tot / num )
+
 (* use this function in fromList *)
 let rec insert t i =
   match t with
@@ -35,19 +37,21 @@ let rec prod1 tree =
     | Node(j,l,r) -> j * prod1 l * prod1 r
 
 let avg1 tree = 
-    let divAv (num, tot) = ( tot / num )
-
-    in let rec f curtree number total = 
+    let rec f curtree number total = 
     match curtree with
       Empty -> (0,0)
       | Node(j,l,r) -> 
-      match f l (number) (total) with
-        (leftN,leftT) -> 
-        match f r (number) (total) with
-          (rightN,rightT) -> 
-
-          (leftN+rightN + 1,rightT+leftT +j)
+      match f l (number) (total) , f r (number) (total) with
+          (leftN,leftT) , (rightN,rightT) -> 
+          (leftN + rightN + 1,rightT + leftT + j)
     in divAv ( f tree 0 0)
+
+let rec map f tree  =
+   match tree with
+    Empty -> Empty
+    | Node(j,l,r) -> Node(f j, map f l, map f r)
+
+let negateAll tree = map (fun x -> -x) tree
 
 let rec fold f a t =
   match t with
@@ -55,6 +59,15 @@ let rec fold f a t =
     | Node(j,l,r) -> fold f (fold f (f a j) l) r
 
 (* put sum2, prod2, and avg2 here *)
+
+let rec sum2 tree = 
+  fold (fun init x -> init+x) 0 tree
+
+let rec prod2 tree = 
+  fold (fun init x -> init*x) 1 tree
+
+let avg2 tree = 
+      divAv (fold (fun init x -> ((fst init) + 1,  (snd init) + x)) (0,0) tree)
 
 type 'a iterator = Nomore | More of 'a * (unit -> 'a iterator)
 
@@ -64,7 +77,6 @@ let rec iter t =
 	Empty -> k ()
     | Node(j,l,r) -> More(j, fun () -> f l (fun () -> f r k))
   in f t (fun () -> Nomore)
-
 
 (* let rec avg3 tree = 
     let divAv (num, tot) = (num / tot) in
@@ -77,16 +89,40 @@ let rec iter t =
 (* challenge problem: put optionToException and exceptionToOption here *)
 
 (* a little testing -- commented out since the functions do not exist yet *)
+let rec print_space n =
+  if n > 0 then (
+    print_string "  ";
+    print_space (n-1)
+  )
+(* print function taken from class piazza site *)
+let print_tree t =
+  let rec print_tree_helper t2 d =
+    match t2 with
+      Empty -> print_string "";
+      | Node(num,l,r) -> (
+          print_tree_helper r (d + 1);
+          print_space d;
+          print_int num;
+          print_string "\n";
+          print_tree_helper l (d + 1)
+        )
+  in
+    match t with
+      Empty -> print_string "Empty"
+      | Node(num,l,r) -> print_tree_helper t 0
 
 let tr = fromList [0;1;2;3;4;5;6;7;8;9;9;9;1] (* repeats get removed *)
 let print_ans f t = print_string (string_of_int (f t)); print_string "\n"
 let _ = print_ans sum1 tr
 let _ = print_ans prod1 tr
 let _ = print_ans avg1 tr
-(*
+let _ = print_tree tr
+let _ = print_tree (map (fun x -> x+x) tr)
+let _ = print_tree (negateAll tr)
 let _ = print_ans sum2 tr
 let _ = print_ans prod2 tr
 let _ = print_ans avg2 tr
+(*
 let _ = print_ans sum3 tr
 let _ = print_ans prod3 tr
 let _ = print_ans avg3 tr
