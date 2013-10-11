@@ -78,13 +78,28 @@ let rec iter t =
     | Node(j,l,r) -> More(j, fun () -> f l (fun () -> f r k))
   in f t (fun () -> Nomore)
 
-(* let rec avg3 tree = 
-    let divAv (num, tot) = (num / tot) in
+let rec sum3 tree = 
+  let rec f iterator sum =
+    match iterator with
+      Nomore -> sum
+      | More(j, rest) -> f (rest ()) (sum + j)
+    in f (iter tree) 0
+
+let rec prod3 tree = 
+  let rec f iterator prod = 
+    match iterator with
+      Nomore -> prod
+      | More(0, rest) -> 0
+      | More(j, rest) -> f (rest ()) (prod * j)
+    in f (iter tree) 1
+
+
+let rec avg3 tree = 
     let rec f iterator number total = 
     match iterator with
-      Nomore -> 0
-      | More(j, rest) -> f rest (number + 1) (total + j) 
-    in divAv ( f (iter tree) 0 0) *)
+      Nomore -> (number,total)
+      | More(j, rest) -> f (rest ()) (number + 1) (total + j) 
+    in divAv ( f (iter tree) 0 0)
 
 (* challenge problem: put optionToException and exceptionToOption here *)
 
@@ -122,8 +137,7 @@ let _ = print_tree (negateAll tr)
 let _ = print_ans sum2 tr
 let _ = print_ans prod2 tr
 let _ = print_ans avg2 tr
-(*
 let _ = print_ans sum3 tr
 let _ = print_ans prod3 tr
 let _ = print_ans avg3 tr
-*)
+
